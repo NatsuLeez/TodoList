@@ -1,41 +1,64 @@
 package com.example.todolist
 
+import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.CheckBox
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import java.util.*
 
 
-class CustomAdapter(private val dataSet: Array<String>) :
-    RecyclerView.Adapter<CustomAdapter.TodoViewHolder>() {
+@SuppressLint("StaticFieldLeak")
+lateinit var tvTitle: TextView
+@SuppressLint("StaticFieldLeak")
+lateinit var cbDone: CheckBox
+
+class TodoAdapter(
+    var todos: MutableList<Todo>,
+
+) : RecyclerView.Adapter<TodoAdapter.TodoViewHolder>() {
 
 
+    inner class TodoViewHolder(itemView: View): RecyclerView.ViewHolder(itemView)
 
-    class TodoViewHolder (view: View) : RecyclerView.ViewHolder(view) {
-        var textView: TextView
-
-        init {
-            textView = view.findViewById(R.id.tvTitle)
-        }
-    }
-
-    override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): TodoViewHolder {
-        // Create a new view, which defines the UI of the list item
-        val view = LayoutInflater.from(viewGroup.context)
-            .inflate(R.layout.item_todo, viewGroup, false)
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TodoViewHolder {
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_todo, parent, false)
 
         return TodoViewHolder(view)
     }
 
-    // Replace the contents of a view (invoked by the layout manager)
-    override fun onBindViewHolder(viewHolder: TodoViewHolder, position: Int) {
-
-        // Get element from your dataset at this position and replace the
-        // contents of the view with that element
-        viewHolder.textView.text = dataSet[position]
+    override fun getItemCount(): Int {
+        return todos.size
     }
-    // Return the size of your dataset (invoked by the layout manager)
-    override fun getItemCount() = dataSet.size
-}
 
+
+
+    override fun onBindViewHolder(holder: TodoViewHolder, position: Int) {
+        holder.itemView.apply {
+            tvTitle = findViewById(R.id.tvTitle)
+            cbDone = findViewById(R.id.cbDone)
+            tvTitle.text = todos[position].title
+            cbDone.isChecked = todos[position].isChecked
+
+            cbDone.setOnCheckedChangeListener { _, isChecked ->
+                todos[position].isChecked = isChecked
+
+            }
+        }
+    }
+    @SuppressLint("NotifyDataSetChanged")
+    fun removeCheckedItems() {
+        val iterator = todos.iterator()
+        while (iterator.hasNext()) {
+            val todo = iterator.next()
+            if (todo.isChecked) {
+                iterator.remove()
+            }
+        }
+        notifyDataSetChanged()
+    }
+
+
+}
